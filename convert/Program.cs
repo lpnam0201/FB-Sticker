@@ -64,7 +64,7 @@ namespace convert
                 .Arg("-gravity center")
                 .Arg($"-extent {longerEdgeLength}x{longerEdgeLength}")
                 .Arg($"-scale {FBStickerWidth}x{FBStickerHeight}")
-                //.Arg("-layers compare-any")
+                .Arg("-layers optimize")
                 .Arg($"{destinationPath}"));
         }
     }
