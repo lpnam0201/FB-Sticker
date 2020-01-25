@@ -1,0 +1,19 @@
+{
+    "name": "FB Sticker",
+    "version": "1.0",
+    "description": "",
+    "manifest_version": 2,
+    "background": {
+        "scripts": ["background.js"],
+        "persistent": true
+    },
+    "permissions": [
+        "webRequest",
+        "webRequestBlocking",
+        "<all_urls>"
+    ],
+    "browser_action": {},
+    "web_accessible_resources": [
+        "BMLgpfAhWGt.js"
+    ]
+}

@@ -1,0 +1,17 @@
+__user : current user id
+__a: allow cross origin
+__dyn: ServerJSDefine
+__csr: CSRBitMap
+__req: h++ / i++
+__beoa: be_one_ahead_key
+__pc: pkg_cohort_key
+dpr: dpr_key
+__rev: sitedata client_revision
+__s: WebSession
+__hsi: haste_session_id_key
+fb_dtsg: DSTG
+jazoest:
+__spin_r: spin_rev_key
+__spin_b: spin_branch_key
+__spin_t: spin_time_key
+ft[tn]:
