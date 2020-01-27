@@ -5,7 +5,8 @@
 function initialize() {
     let chatTabObserver = new MutationObserver((mutationList, observer) => {
         var stickersContainerDiv = document.querySelector('div[aria-label=Stickers] > div > div > div > div');
-        chrome.runtime.getURL('')
+        
+        
     });
     let config = {
         attributeFilter: [],
