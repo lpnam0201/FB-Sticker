@@ -6,5 +6,16 @@
     "background": {
         "scripts": ["background.js"],
         "persistent": true
-    }
+    },
+    "browser_action": {},
+    "permissions": [
+        "tabs",
+        "https://*.facebook.com/*"
+    ],
+    "web_accessible_resources": [
+        "images/*",
+        "scripts/*",
+        "templates/*",
+        "lib/*"
+    ]
 }

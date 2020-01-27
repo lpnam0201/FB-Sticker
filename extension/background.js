@@ -1,18 +1,59 @@
-chrome.browserAction.onClicked.addListener(() => { 
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+    if (tab.url === 'https://www.facebook.com/'
+        && changeInfo.status === 'complete') {
+
+        loadStickerData(tabId)
+    }
+})
+
+function loadStickerData(tabId) {
     chrome.runtime.getPackageDirectoryEntry(root => {
-        root.getFile('18526629.gif', {}, fileEntry => {
+        console.log(root);
+        root.getFile('stickers.json', {}, fileEntry => {
             fileEntry.file(file => {
-                let formData = new FormData();
-                formData.append('upload_1031', file);
-
-                let xhr = new XMLHttpRequest();
-                xhr.onerror = e => console.log(e);
-                xhr.open('POST', '');
-
-                xhr.setRequestHeader('Content-Type', 'multipart/form-data');
-                xhr.setRequestHeader('x-msgr-region', 'ASH')
-                xhr.send(formData);
+                let reader = new FileReader();
+                reader.onloadend = e => {
+                    let stickerGroupsStr = e.target.result
+                    setGlobalData(tabId, stickerGroupsStr);
+                }
+                
+                reader.readAsText(file);
             })
         })
     })
-});
+}
+
+function setGlobalData(tabId, stickerGroupsStr) {
+    chrome.tabs.executeScript(tabId, {
+        code: `
+            var script = document.createElement('script');
+            var injectedCode = \`var stickerGroups = JSON.parse('${stickerGroupsStr}');\`
+            script.textContent = injectedCode;    
+            document.head.appendChild(script);
+            `,
+    }, () => {
+        injectMustache(tabId);
+    });
+}
+
+function injectMustache(tabId) {
+    chrome.tabs.executeScript(tabId, {
+        code: `
+            var script = document.createElement('script');
+            script.src = chrome.runtime.getURL('lib/mustache.js');
+            document.head.appendChild(script);
+            `,
+    }, () => { 
+        injectObserver(tabId); 
+    });
+}
+
+function injectObserver(tabId) {
+    chrome.tabs.executeScript(tabId, {
+        code: `
+            var script = document.createElement('script');
+            script.src = chrome.runtime.getURL('scripts/observer.js');
+            document.head.appendChild(script);
+            `,
+    });
+}

@@ -4,6 +4,7 @@
   "description": "",
   "main": "app.js",
   "dependencies": {
+    "@types/ws": "^7.2.0",
     "cors": "^2.8.5",
     "express": "^4.17.1",
     "facebook-chat-api": "^1.6.1",
