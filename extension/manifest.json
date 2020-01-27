@@ -6,15 +6,5 @@
     "background": {
         "scripts": ["background.js"],
         "persistent": true
-    },
-    "permissions": [
-        "webRequest",
-        "webRequestBlocking",
-        "<all_urls>"
-    ],
-    "browser_action": {},
-    "web_accessible_resources": [
-        "BMLgpfAhWGt.js",
-        "RWjdqm6wZpx.js"
-    ]
+    }
 }

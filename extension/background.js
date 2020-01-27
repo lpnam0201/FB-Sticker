@@ -16,12 +16,3 @@ chrome.browserAction.onClicked.addListener(() => {
         })
     })
 });
-
-chrome.webRequest.onBeforeRequest.addListener(detail => {
-    if (detail.url === 'https://static.xx.fbcdn.net/rsrc.php/v3/yV/r/BMLgpfAhWGt.js?_nc_x=uK4Q5_mHvx4') {
-        return { redirectUrl: chrome.extension.getURL('BMLgpfAhWGt.js') };
-    }
-    if (detail.url === 'https://static.xx.fbcdn.net/rsrc.php/v3iz2h4/yp/l/en_US/RWjdqm6wZpx.js?_nc_x=uK4Q5_mHvx4') {
-        return { redirectUrl: chrome.extension.getURL('RWjdqm6wZpx.js') };
-    }
-}, { urls: ['<all_urls>']}, ['blocking']);
