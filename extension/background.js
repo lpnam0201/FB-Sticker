@@ -14,7 +14,10 @@ function loadStickerData(tabId) {
                 let reader = new FileReader();
                 reader.onloadend = e => {
                     let stickerGroupsStr = e.target.result
-                    setGlobalData(tabId, stickerGroupsStr);
+                    setGlobalData(tabId, stickerGroupsStr, () =>
+                        injectMustache(tabId, () =>
+                            injectObserver(tabId, () => {}))
+                        );
                 }
                 
                 reader.readAsText(file);
@@ -23,7 +26,7 @@ function loadStickerData(tabId) {
     })
 }
 
-function setGlobalData(tabId, stickerGroupsStr) {
+function setGlobalData(tabId, stickerGroupsStr, cb) {
     chrome.tabs.executeScript(tabId, {
         code: `
             var script = document.createElement('script');
@@ -31,29 +34,25 @@ function setGlobalData(tabId, stickerGroupsStr) {
             script.textContent = injectedCode;    
             document.head.appendChild(script);
             `,
-    }, () => {
-        injectMustache(tabId);
-    });
+    }, cb);
 }
 
-function injectMustache(tabId) {
+function injectMustache(tabId, cb) {
     chrome.tabs.executeScript(tabId, {
         code: `
             var script = document.createElement('script');
             script.src = chrome.runtime.getURL('lib/mustache.js');
             document.head.appendChild(script);
             `,
-    }, () => { 
-        injectObserver(tabId); 
-    });
+    }, cb);
 }
 
-function injectObserver(tabId) {
+function injectObserver(tabId, cb) {
     chrome.tabs.executeScript(tabId, {
         code: `
             var script = document.createElement('script');
             script.src = chrome.runtime.getURL('scripts/observer.js');
             document.head.appendChild(script);
             `,
-    });
+    }, cb);
 }
