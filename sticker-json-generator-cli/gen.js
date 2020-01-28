@@ -10,12 +10,12 @@ fs.readdir(sourceDir, (err, dirs) => {
     let promises = [];
     
     for (let dir of dirs) {
-        promises.push(readDirPromise(`${sourceDir}/${dir}`)
-            .then(stickers => {
+        promises.push(readDirPromise(`${sourceDir}\\${dir}`)
+            .then(files => {
                 id++;
-                let stickerGroup = buildStickerGroup(stickers, dir, id);
+                let stickerGroup = buildStickerGroup(files, dir, id);
                 stickerGroups.push(stickerGroup);
-                console.log(`Found ${stickers.length} stickers in ${__dirname}/${dir}`)
+                console.log(`Found ${files.length} files in ${__dirname}/${dir}`)
             }));
     }
     
@@ -27,17 +27,23 @@ fs.readdir(sourceDir, (err, dirs) => {
         })
 });
 
-function buildStickerGroup(stickers, dir, id) {
+function findGroupThumbnail(files, groupThumbnailFileName) {
+    return files.find(f => f.indexOf(groupThumbnailFileName) !== -1);
+}
+
+function buildStickerGroup(files, dir, id) {
+    let groupThumbnailFileName = 'groupThumbnail';
+
     let stickerGroup = {
         groupId: id,
         groupName: dir,
-        groupThumbnail: 'groupThumbnail.gif',
+        groupThumbnail: findGroupThumbnail(files, groupThumbnailFileName) || '',
         stickers: []
     }
     
-    for (let sticker of stickers) {
-        // skip thumbnail png
-        if (sticker.indexOf('groupThumbnail') === -1) {
+    for (let sticker of files) {
+        // skip group thumbnail
+        if (sticker.indexOf(groupThumbnailFileName) === -1) {
             stickerGroup.stickers.push({
                 id: sticker.replace('.gif', ''),
                 thumbnail: sticker
