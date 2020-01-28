@@ -1,15 +1,16 @@
 const fs = require('fs');
 
-const args = process.argv;
-let stickersDir = args[0];
+const args = process.argv.slice(2);
+let sourceDir = args[0];
+let destinationDir = args[1];
 
-fs.readdir(stickersDir, (err, dirs) => {
+fs.readdir(sourceDir, (err, dirs) => {
     let stickerGroups = [];
     let id = 0;
     let promises = [];
     
     for (let dir of dirs) {
-        promises.push(readDirPromise(`${stickersDir}/${dir}`)
+        promises.push(readDirPromise(`${sourceDir}/${dir}`)
             .then(stickers => {
                 id++;
                 let stickerGroup = buildStickerGroup(stickers, dir, id);
@@ -20,7 +21,7 @@ fs.readdir(stickersDir, (err, dirs) => {
     
     Promise.all(promises)
         .then(() => {
-            fs.writeFile('stickers.json', JSON.stringify(stickerGroups), () => {
+            fs.writeFile(`${destinationDir}/stickers.json`, JSON.stringify(stickerGroups), () => {
                 console.log('Done');
             });
         })
@@ -30,13 +31,13 @@ function buildStickerGroup(stickers, dir, id) {
     let stickerGroup = {
         groupId: id,
         groupName: dir,
-        groupThumbnail: 'groupThumbnail.png',
+        groupThumbnail: 'groupThumbnail.gif',
         stickers: []
     }
     
     for (let sticker of stickers) {
         // skip thumbnail png
-        if (sticker.indexOf('.gif') !== -1) {
+        if (sticker.indexOf('groupThumbnail') === -1) {
             stickerGroup.stickers.push({
                 id: sticker.replace('.gif', ''),
                 thumbnail: sticker

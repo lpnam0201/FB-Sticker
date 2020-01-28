@@ -1,0 +1,1 @@
+node gen.js "..\extension\images\stickers" "..\extension"
