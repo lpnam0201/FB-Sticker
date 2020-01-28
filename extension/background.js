@@ -1,5 +1,5 @@
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-    if (tab.url === 'https://www.facebook.com/'
+    if (tab.url.indexOf('https://www.facebook.com/') !== -1
         && changeInfo.status === 'complete') {
         loadStickerData(tabId);
     }
@@ -26,6 +26,8 @@ function loadStickerData(tabId) {
 }
 
 function setGlobalData(tabId, stickerGroupsStr, cb) {
+    stickerGroupsStr = convertThumbnailPath(stickerGroupsStr);
+
     chrome.tabs.executeScript(tabId, {
         code: `
             var script = document.createElement('script');
@@ -36,11 +38,24 @@ function setGlobalData(tabId, stickerGroupsStr, cb) {
     }, cb);
 }
 
+function convertThumbnailPath(stickerGroupsStr) {
+    let stickerGroups = JSON.parse(stickerGroupsStr);
+    for (let stickerGroup of stickerGroups) {
+        stickerGroup.groupThumbnail = chrome.runtime.getURL(
+            `images/stickers/${stickerGroup.groupName}/${stickerGroup.groupThumbnail}`);
+        for (let sticker of stickerGroup.stickers) {
+            sticker.thumbnail = chrome.runtime.getURL(
+                `images/stickers/${stickerGroup.groupName}/${sticker.thumbnail}`);
+        }
+    }
+    return JSON.stringify(stickerGroups);
+}
+
 function injectMustache(tabId, cb) {
     chrome.tabs.executeScript(tabId, {
         code: `
             var script = document.createElement('script');
-            script.src = chrome.runtime.getURL('lib/mustache.js');
+            script.src = chrome.runtime.getURL('lib/customMustache.js');
             document.head.appendChild(script);
             `
     }, cb);
@@ -55,23 +70,22 @@ function fetchTemplate(templateName, cb) {
 function injectTemplates(tabId, cb) {
     chrome.runtime.getPackageDirectoryEntry(async root => {
         let promises = [];
-        
-        let template = {};
-        let stickerTabStr;
-        promises.push(fetchTemplate('stickerTab', data => stickerTabStr = data));
-        let stickerTabGroupStr;
-        promises.push(fetchTemplate('stickerTabGroup', data => stickerTabGroupStr = data));
-        let stickerTableStr;
-        promises.push(fetchTemplate('stickerTable', data => stickerTableStr = data));
+
+        let stickerTabTemplate;
+        promises.push(fetchTemplate('stickerTab', data => stickerTabTemplate = data));
+        let stickerTabContainerTemplate;
+        promises.push(fetchTemplate('stickerTabContainer', data => stickerTabContainerTemplate = data));
+        let stickerTableTemplate;
+        promises.push(fetchTemplate('stickerTable', data => stickerTableTemplate = data));
 
         Promise.all(promises).then(() => {
             chrome.tabs.executeScript(tabId, {
                 code: `
                     var script = document.createElement('script');
                     var injectedCode = \` 
-                        var stickerTabHtml = \\\`${stickerTabStr}\\\`;
-                        var stickerTabGroupHtml = \\\`${stickerTabGroupStr}\\\`;
-                        var stickerTableHtml = \\\`${stickerTableStr}\\\`;
+                        var stickerTabTemplate = \\\`${stickerTabTemplate}\\\`;
+                        var stickerTabContainerTemplate = \\\`${stickerTabContainerTemplate}\\\`;
+                        var stickerTableTemplate = \\\`${stickerTableTemplate}\\\`;
                     \`
                     script.textContent = injectedCode;
                     document.head.appendChild(script);
@@ -87,6 +101,7 @@ function injectObserver(tabId, cb) {
             var script = document.createElement('script');
             script.src = chrome.runtime.getURL('scripts/observer.js');
             document.head.appendChild(script);
-            `
+            `,
+        runAt: 'document_end'
     }, cb);
 }
