@@ -8,9 +8,12 @@
 (function defineMustache (global, factory) {
   if (typeof exports === 'object' && exports && typeof exports.nodeName !== 'string') {
     factory(exports); // CommonJS
-  } else if (typeof define === 'function' && define.amd) {
-    define(['exports'], factory); // AMD
-  } else {
+  } 
+  // Facebook page has a define function so Mustache cannot be loaded as page script
+  // else if (typeof define === 'function' && define.amd) {
+  //   define(['exports'], factory); // AMD
+  // } 
+  else {
     global.Mustache = {};
     factory(global.Mustache); // script, wsh, asp
   }
