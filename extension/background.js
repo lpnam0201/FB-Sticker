@@ -67,26 +67,28 @@ function fetchTemplate(templateName, cb) {
         .then(data => cb(data));
 }
 
+var templateNames = [
+    'stickerTab', 
+    'stickerTabContainer',
+    'stickerTable'
+];
+
 function injectTemplates(tabId, cb) {
     chrome.runtime.getPackageDirectoryEntry(async root => {
         let promises = [];
 
-        let stickerTabTemplate;
-        promises.push(fetchTemplate('stickerTab', data => stickerTabTemplate = data));
-        let stickerTabContainerTemplate;
-        promises.push(fetchTemplate('stickerTabContainer', data => stickerTabContainerTemplate = data));
-        let stickerTableTemplate;
-        promises.push(fetchTemplate('stickerTable', data => stickerTableTemplate = data));
+        let setTemplateJs = ''
+        for (let name of templateNames) {
+            promises.push(fetchTemplate(name, content => {
+                setTemplateJs += `var ${name}Template = \\\`${content}\\\`;`
+            }));
+        }
 
         Promise.all(promises).then(() => {
             chrome.tabs.executeScript(tabId, {
                 code: `
                     var script = document.createElement('script');
-                    var injectedCode = \` 
-                        var stickerTabTemplate = \\\`${stickerTabTemplate}\\\`;
-                        var stickerTabContainerTemplate = \\\`${stickerTabContainerTemplate}\\\`;
-                        var stickerTableTemplate = \\\`${stickerTableTemplate}\\\`;
-                    \`
+                    var injectedCode = \`${setTemplateJs}\`
                     script.textContent = injectedCode;
                     document.head.appendChild(script);
                     `

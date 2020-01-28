@@ -18,7 +18,14 @@ function createStickerTabElement(stickerGroup) {
         stickerGroupImage: stickerGroup.groupThumbnail
     });
 
-    return htmlToElement(html);
+    let tabElement = htmlToElement(html);
+    //tabElement.addEventListener('click', )
+    return tabElement;
+}
+
+function insertStickersTableElement(groupId) {
+    let group = stickerGroups.find(g => g.groupId === groupId);
+    let tableElement = Mustache.render()
 }
 
 function htmlToElement(html) {
