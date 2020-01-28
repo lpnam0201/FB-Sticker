@@ -1,21 +1,24 @@
 
-function buildStickerTabContainerHtml(stickerGroups) {
-    let stickerTabsHtml = '';
-    for (let stickerGroup of stickerGroups) {
-        stickerTabsHtml += buildStickerTabHtml(stickerGroup);
-    }
+function createStickerTabContainerElement(stickerGroups) {
+    let html = Mustache.render(stickerTabContainerTemplate);
+    let tabContainerElement = htmlToElement(html);
 
-    return Mustache.render(stickerTabContainerTemplate, {
-        stickerTabsHtml: stickerTabsHtml
-    });
+    for (let stickerGroup of stickerGroups) {
+        let tabElement = createStickerTabElement(stickerGroup);
+        tabContainerElement.appendChild(tabElement);
+    }
+    
+    return tabContainerElement;
 }
 
-function buildStickerTabHtml(stickerGroup) {
-    return Mustache.render(stickerTabTemplate, {
+function createStickerTabElement(stickerGroup) {
+    let html = Mustache.render(stickerTabTemplate, {
         stickerGroupId: stickerGroup.groupId,
         stickerGroupName: stickerGroup.groupName,
         stickerGroupImage: stickerGroup.groupThumbnail
-    })
+    });
+
+    return htmlToElement(html);
 }
 
 function htmlToElement(html) {
@@ -31,8 +34,7 @@ function initialize() {
         let stickersContainerDiv = document.querySelector('div[aria-label=Stickers] > div > div > div > div');
         if (stickersContainerDiv !== null && !isStickerTabsAppended) {
             if (!isStickerTabsAppended) {
-                let stickerTabContainerHtml = buildStickerTabContainerHtml(stickerGroups);
-                let element = htmlToElement(stickerTabContainerHtml);
+                let element = createStickerTabContainerElement(stickerGroups);
                 stickersContainerDiv.appendChild(element);
                 isStickerTabsAppended = true;
             }
