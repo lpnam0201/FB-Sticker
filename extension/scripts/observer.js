@@ -117,11 +117,16 @@ function chatTabContainerMutationHandler(mutationList, observer) {
     let stickersTableObserver = new MutationObserver(stickerTableContainerMutationHandler);
 
     let addedStickersTabBar = document.querySelector('._5r89');
-    if (addedStickersTabBar !== null && !addedStickersTabBar.getAttribute('data-appended-stickers-tab')) {
-        let element = createStickerTabContainerElement(stickerGroups);
-        addedStickersTabBar.appendChild(element);
-        addedStickersTabBar.setAttribute('data-appended-stickers-tab', true);
-        observeDataIdOfStickerTableContainer(stickersTableObserver);
+    if (addedStickersTabBar !== null) {
+        if (!addedStickersTabBar.getAttribute('data-appended-stickers-tab')) {
+            let element = createStickerTabContainerElement(stickerGroups);
+            addedStickersTabBar.appendChild(element);
+            addedStickersTabBar.setAttribute('data-appended-stickers-tab', true);
+            observeDataIdOfStickerTableContainer(stickersTableObserver);
+        }
+    // sticker tab bar is not found means sticker popup is closed
+    } else {
+        stickersTableObserver.disconnect();
     }
 }
 
