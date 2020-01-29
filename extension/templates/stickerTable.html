@@ -1,4 +1,28 @@
-<table cols="4" class="uiGrid _51mz _5f0n" cellspacing="0" cellpadding="0">
-    <tbody>
-    </tbody>
-</table>
+
+<div height="320" width="278" class="uiScrollableArea fade uiScrollableAreaWithShadow contentAfter fbExtension">
+    <div class="uiScrollableAreaWrap scrollable" style="overscroll-behavior: contain;">
+        <div class="uiScrollableAreaBody" style="margin-right: -17px; width: 278px;">
+            <div class="uiScrollableAreaContent">
+                <div class="_5r8k">
+                    <table cols="4" class="uiGrid _51mz _5f0n" cellspacing="0" cellpadding="0">
+                        <tbody>
+                            {{#rows}}
+                            <tr class="_51mx">
+                                {{#cells}}
+                                <td class="_51m-">
+                                    <div class="_5r8h">
+                                        <div class="_5r8i"> 
+                                            <img src={{thumbnail}} style="height: 64px; widows: 64px;">  
+                                        </div>
+                                    </div>
+                                </td>    
+                                {{/cells}}
+                            </tr>
+                            {{/rows}}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
