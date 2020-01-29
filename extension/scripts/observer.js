@@ -1,3 +1,48 @@
+function simulateDragDrop(sourceNode, destinationNode, files) {
+    var EVENT_TYPES = {
+        DRAG_END: 'dragend',
+        DRAG_START: 'dragstart',
+        DROP: 'drop'
+    }
+
+    function createCustomEvent(type) {
+        var event = new CustomEvent("CustomEvent")
+        event.initCustomEvent(type, true, true, null)
+        event.dataTransfer = {
+            data: {
+            },
+            setData: function(type, val) {
+                this.data[type] = val
+            },
+            getData: function(type) {
+                return this.data[type]
+            },
+            files: files,
+            types: "Files"
+        }
+        return event
+    }
+
+    function dispatchEvent(node, type, event) {
+        if (node.dispatchEvent) {
+            return node.dispatchEvent(event)
+        }
+        if (node.fireEvent) {
+            return node.fireEvent("on" + type, event)
+        }
+    }
+
+    var event = createCustomEvent(EVENT_TYPES.DRAG_START)
+    dispatchEvent(sourceNode, EVENT_TYPES.DRAG_START, event)
+
+    var dropEvent = createCustomEvent(EVENT_TYPES.DROP)
+    dropEvent.dataTransfer = event.dataTransfer
+    dispatchEvent(destinationNode, EVENT_TYPES.DROP, dropEvent)
+
+    var dragEndEvent = createCustomEvent(EVENT_TYPES.DRAG_END)
+    dragEndEvent.dataTransfer = event.dataTransfer
+    dispatchEvent(sourceNode, EVENT_TYPES.DRAG_END, dragEndEvent)
+}
 
 function chunk (arr, len) {
     var chunks = [], i = 0, n = arr.length;
@@ -69,7 +114,15 @@ function htmlToElement(html) {
 }
 
 function chatTabContainerMutationHandler(mutationList, observer) {
+    let stickersTableObserver = new MutationObserver(stickerTableContainerMutationHandler);
 
+    let addedStickersTabBar = document.querySelector('._5r89');
+    if (addedStickersTabBar !== null && !addedStickersTabBar.getAttribute('data-appended-stickers-tab')) {
+        let element = createStickerTabContainerElement(stickerGroups);
+        addedStickersTabBar.appendChild(element);
+        addedStickersTabBar.setAttribute('data-appended-stickers-tab', true);
+        observeDataIdOfStickerTableContainer(stickersTableObserver);
+    }
 }
 
 function isStickerTableOfExtensionAdded(mutationList) {
@@ -120,19 +173,23 @@ function stickerTableContainerMutationHandler(mutationList, observer) {
     // So this case is already handled.
 }
 
-function initialize() {
-    let chatTabContainerObserver = new MutationObserver((mutationList, observer) => {
-        let stickersTableObserver = new MutationObserver(stickerTableContainerMutationHandler);
+function onStickerClick(stickerElement) {
+    let dropPanelElement = stickerElement.closest('div.uiContextualLayerPositioner._1r_9.uiLayer')
+        .previousElementSibling
+        .querySelector('._1ia._2sz2');
 
-        let addedStickersTabBar = document.querySelector('._5r89');
-        if (addedStickersTabBar !== null && !addedStickersTabBar.getAttribute('data-appended-stickers-tab')) {
-            let element = createStickerTabContainerElement(stickerGroups);
-            addedStickersTabBar.appendChild(element);
-            addedStickersTabBar.setAttribute('data-appended-stickers-tab', true);
-            observeDataIdOfStickerTableContainer(stickersTableObserver);
-        }
-    });
-    
+    fetch(stickerElement.src)
+        .then(res => res.arrayBuffer())
+        .then(buffer => {
+            let file = new File([buffer], 'a.gif', { type: 'image/gif' });
+            simulateDragDrop(stickerElement, dropPanelElement, [file]);
+            // let sendButtonElement = dropPanelElement.querySelector('a._6gb._6wm4._6987');
+            // sendButtonElement.click();
+        })
+}
+
+function initialize() {
+    let chatTabContainerObserver = new MutationObserver(chatTabContainerMutationHandler);
     observeForStickerPopup(chatTabContainerObserver);
 }
 
