@@ -45,7 +45,7 @@ function simulateDragDrop(sourceNode, destinationNode, files) {
 }
 
 function chunk (arr, len) {
-    var chunks = [], i = 0, n = arr.length;
+    let chunks = [], i = 0, n = arr.length;
   
     while (i < n) {
       chunks.push(arr.slice(i, i += len));
@@ -113,7 +113,7 @@ function htmlToElement(html) {
     return template.content.firstChild;
 }
 
-function chatTabContainerMutationHandler(mutationList, observer) {
+function chatTabContainerMutationHandler(mutations, observer) {
     let stickersTableObserver = new MutationObserver(stickerTableContainerMutationHandler);
 
     let addedStickersTabBar = document.querySelector('._5r89');
@@ -130,8 +130,8 @@ function chatTabContainerMutationHandler(mutationList, observer) {
     }
 }
 
-function isStickerTableOfExtensionAdded(mutationList) {
-    for (let mutation of mutationList) {
+function isStickerTableOfExtensionAdded(mutations) {
+    for (let mutation of mutations) {
         let nodes = mutation.addedNodes.values();
         for (let node of nodes) {
             if (node.classList.contains('fbExtension')) {
@@ -143,14 +143,14 @@ function isStickerTableOfExtensionAdded(mutationList) {
     return false;
 }
 
-function stickerTableContainerMutationHandler(mutationList, observer) {
+function stickerTableContainerMutationHandler(mutations, observer) {
     let stickerTableContainerElement = document.querySelector(
         'div[aria-label=Stickers] > div:nth-child(2) > div');
     
     let tablesAddedByExtension = document.querySelectorAll('.fbExtension')
     
     // watch for data-id so there should be only one change at a time
-    let mutationRecord = mutationList[0];
+    let mutationRecord = mutations[0];
     let node = mutationRecord.target;
 
     // #1 extension tab -> normal tab
@@ -178,6 +178,28 @@ function stickerTableContainerMutationHandler(mutationList, observer) {
     // So this case is already handled.
 }
 
+function chatToolBarChangedHandler(mutations, observer) {
+    for (let mutation of mutations) {
+        let nodes = mutation.addedNodes.values();
+        for (let node of nodes) {
+            if (node.className === '_6gd _21u1') {
+                observer.disconnect();
+                let sendButtonElement = node.querySelector('._6gb._6wm4._6987');
+                sendButtonElement.click();
+                break;
+            }
+        }
+    }
+}
+
+function observeChatToolBar(mutationObserver, chatToolBarElement) {
+    let options = {
+        childList: true
+    }
+
+    mutationObserver.observe(chatToolBarElement, options);
+}
+
 function onStickerClick(stickerElement) {
     let dropPanelElement = stickerElement.closest('div.uiContextualLayerPositioner._1r_9.uiLayer')
         .previousElementSibling
@@ -186,10 +208,12 @@ function onStickerClick(stickerElement) {
     fetch(stickerElement.src)
         .then(res => res.arrayBuffer())
         .then(buffer => {
+            let chatToolBarElement = dropPanelElement.querySelector('._552n');
+            let chatToolBarObserver = new MutationObserver(chatToolBarChangedHandler);
+            observeChatToolBar(chatToolBarObserver, chatToolBarElement);
+
             let file = new File([buffer], 'a.gif', { type: 'image/gif' });
             simulateDragDrop(stickerElement, dropPanelElement, [file]);
-            // let sendButtonElement = dropPanelElement.querySelector('a._6gb._6wm4._6987');
-            // sendButtonElement.click();
         })
 }
 
@@ -199,7 +223,7 @@ function initialize() {
 }
 
 function observeDataIdOfStickerTableContainer(mutationObserver) {
-    let config = {
+    let options = {
         attributeFilter: ['data-id'],
         attribute: true,
         attributeOldValue: true
@@ -209,20 +233,19 @@ function observeDataIdOfStickerTableContainer(mutationObserver) {
     let tableContainerElement = document.querySelector(
         'div[aria-label=Stickers] > div:nth-child(2) > div');
     
-    mutationObserver.observe(tableContainerElement, config);
+    mutationObserver.observe(tableContainerElement, options);
 }
 
 function observeForStickerPopup(mutationObserver) {
-    let config = {
-        attributeFilter: [],
+    let options = {
         childList: true, 
         subtree: true 
     };
     
-    // Only watch chat tabs container to avoid too many mutation being detected
-    let chatTabContainer = document.getElementsByClassName('_59v1')[0];
+    // Only watch chat tabs container to avoid too many mutations being detected
+    let chatTabContainer = document.querySelector('._59v1');
     if (chatTabContainer) {
-        mutationObserver.observe(chatTabContainer, config);
+        mutationObserver.observe(chatTabContainer, options);
     } else {
         // Is on messenger page
         // TODO on messenger page
