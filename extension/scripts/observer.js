@@ -113,16 +113,28 @@ function htmlToElement(html) {
     return template.content.firstChild;
 }
 
+function attachHighlightOnSelectToStickerTabs() {
+    let stickerTabs = document.querySelectorAll('._5r8a');
+    for (let stickerTab of stickerTabs) {
+        stickerTab.onclick = function() {
+            // clear all selected class on all sticker tabs and set select for itself
+            stickerTabs.forEach(st => { st.classList.remove('_5r8b') });
+            stickerTab.classList.add('_5r8b');
+        }
+    }
+}
+
 function chatTabContainerMutationHandler(mutations, observer) {
     let stickersTableObserver = new MutationObserver(stickerTableContainerMutationHandler);
 
-    let addedStickersTabBar = document.querySelector('._5r89');
-    if (addedStickersTabBar !== null) {
-        if (!addedStickersTabBar.getAttribute('data-appended-stickers-tab')) {
+    let stickersTabBar = document.querySelector('._5r89');
+    if (stickersTabBar !== null) {
+        if (!stickersTabBar.getAttribute('data-appended-stickers-tab')) {
             let element = createStickerTabContainerElement(stickerGroups);
-            addedStickersTabBar.appendChild(element);
-            addedStickersTabBar.setAttribute('data-appended-stickers-tab', true);
+            stickersTabBar.appendChild(element);
+            stickersTabBar.setAttribute('data-appended-stickers-tab', true);
             observeDataIdOfStickerTableContainer(stickersTableObserver);
+            attachHighlightOnSelectToStickerTabs();
         }
     // sticker tab bar is not found means sticker popup is closed
     } else {
@@ -178,7 +190,7 @@ function stickerTableContainerMutationHandler(mutations, observer) {
     // So this case is already handled.
 }
 
-function chatToolBarChangedHandler(mutations, observer) {
+function chatToolBarMutationHandler(mutations, observer) {
     for (let mutation of mutations) {
         let nodes = mutation.addedNodes.values();
         for (let node of nodes) {
@@ -209,7 +221,7 @@ function onStickerClick(stickerElement) {
         .then(res => res.arrayBuffer())
         .then(buffer => {
             let chatToolBarElement = dropPanelElement.querySelector('._552n');
-            let chatToolBarObserver = new MutationObserver(chatToolBarChangedHandler);
+            let chatToolBarObserver = new MutationObserver(chatToolBarMutationHandler);
             observeChatToolBar(chatToolBarObserver, chatToolBarElement);
 
             let file = new File([buffer], 'a.gif', { type: 'image/gif' });
