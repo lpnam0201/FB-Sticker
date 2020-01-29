@@ -117,24 +117,15 @@ function stickerTableContainerMutationHandler(mutationList, observer) {
 }
 
 function initialize() {
-    let isStickerTabsAppended = false;
     let chatTabContainerObserver = new MutationObserver((mutationList, observer) => {
         let stickersTableObserver = new MutationObserver(stickerTableContainerMutationHandler);
 
-        let stickersTabBar = document.querySelector(
-            'div[aria-label=Stickers] > div > div > div > div');
-        if (stickersTabBar !== null && !isStickerTabsAppended) {
-            if (!isStickerTabsAppended) {
-                let element = createStickerTabContainerElement(stickerGroups);
-                stickersTabBar.appendChild(element);
-                isStickerTabsAppended = true;
-                observeDataIdOfStickerTableContainer(stickersTableObserver);
-            }
-        } 
-
-        if (stickersTabBar === null) {
-            isStickerTabsAppended = false;
-            stickersTableObserver.disconnect();
+        let addedStickersTabBar = document.querySelector('._5r89');
+        if (addedStickersTabBar !== null && !addedStickersTabBar.getAttribute('data-appended-stickers-tab')) {
+            let element = createStickerTabContainerElement(stickerGroups);
+            addedStickersTabBar.appendChild(element);
+            addedStickersTabBar.setAttribute('data-appended-stickers-tab', true);
+            observeDataIdOfStickerTableContainer(stickersTableObserver);
         }
     });
     
