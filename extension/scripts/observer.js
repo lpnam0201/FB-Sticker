@@ -106,6 +106,10 @@ function stickerTableContainerMutationHandler(mutationList, observer) {
         // results in 2 tables prepended by extension but only the latest one is needed
         [...tablesAddedByExtension].slice(1).forEach(table => stickerTableContainerElement.removeChild(table))
     }
+    // #3 normal tab -> extension tab -> initial
+    if (!mutationRecord.oldValue && !node.hasAttribute('data-id')) {
+        tablesAddedByExtension.forEach(table => stickerTableContainerElement.removeChild(table));
+    }
     // normal tab -> normal tab 
     // and normal tab -> extension tab
     // doesn't need to be handled
