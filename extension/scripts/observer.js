@@ -113,8 +113,8 @@ function htmlToElement(html) {
     return template.content.firstChild;
 }
 
-function attachHighlightOnSelectToStickerTabs() {
-    let stickerTabs = document.querySelectorAll('._5r8a');
+function attachHighlightOnSelectToStickerTabs(stickersTabBar) {
+    let stickerTabs = stickersTabBar.querySelectorAll('._5r8a');
     for (let stickerTab of stickerTabs) {
         stickerTab.onclick = function() {
             // clear all selected class on all sticker tabs and set select for itself
@@ -124,8 +124,132 @@ function attachHighlightOnSelectToStickerTabs() {
     }
 }
 
-function chatTabContainerMutationHandler(mutations, observer) {
-    let stickersTableObserver = new MutationObserver(stickerTableContainerMutationHandler);
+function getElementLeftOffset(element) {
+    return pxToNumber(window.getComputedStyle(element).left);
+}
+
+function pxToNumber(px) {
+    return parseInt(px.replace('px', ''));
+}
+
+function createPreviousTabsButtonElement(stickersTabBar) {
+    let element = htmlToElement(Mustache.render(previousTabsButtonTemplate));
+    element.classList.add('previous-stickers');
+
+    element.onclick = function() {
+        let currentLeftOffset = getElementLeftOffset(stickersTabBar);
+
+        // First transition from search tab shifts by 208px because search and recent tabs are 41px
+        // while sticker tabs are all 42px
+        // Subsequent transitions shift by 210px at a time (5 sticker tabs)
+        let shiftBy = Math.abs(currentLeftOffset) === 208 ? 208 : 210;
+        stickersTabBar.setAttribute('style', `left: ${currentLeftOffset + shiftBy}px;`)
+    }
+
+    return element;
+}
+
+function createNextTabsButtonElement(stickersTabBar) {
+    let element = htmlToElement(Mustache.render(nextTabsButtonTemplate));
+    element.classList.add('next-stickers');
+
+    element.onclick = function() {
+        let currentLeftOffset = getElementLeftOffset(stickersTabBar);
+
+        // Final transition to search tab shifts by 208px because search and recent tabs are 41px
+        // while sticker tabs are all 42px
+        // Subsequent transitions shift by 210px at a time (5 sticker tabs)
+        let shiftBy = currentLeftOffset === 0 ? 208 : 210;
+        stickersTabBar.setAttribute('style', `left: ${currentLeftOffset - shiftBy}px;`)
+    }
+
+    return element;
+}
+
+function insertNavigationButtons(stickersTabBar) {
+    // Construct custom navigation button
+    let navigationButtonParentElement = stickersTabBar.closest('._5r85');
+    let fbAddStickerButton = navigationButtonParentElement.querySelector('._5r86');
+    
+    let previousButtonElement = createPreviousTabsButtonElement(stickersTabBar)
+    navigationButtonParentElement.prepend(previousButtonElement);
+    let nextButtonElement = createNextTabsButtonElement(stickersTabBar);
+    navigationButtonParentElement.insertBefore(nextButtonElement, fbAddStickerButton.nextElementSibling);
+}
+
+function navigationButtonUpdatedMutationsHandler(mutations, observer) {
+    // This observer is only used to observe one node so it's safe to get its target at [0]
+    let node = mutations[0].target;
+
+    // Hide FB's default navigation next, prev buttons
+    let fbNavigationButtonElements = node
+        .querySelectorAll('._37wv:not(.next-stickers), ._37wu:not(.previous-stickers)');
+    fbNavigationButtonElements.forEach(button => { button.setAttribute('style', 'display:none') });
+}
+
+function observeNavigationButtonUpdated(stickersTabBar, observer) {
+    let options = {
+        childList: true
+    };
+
+    let navigationButtonParentElement = stickersTabBar.closest('._5r85');
+    observer.observe(navigationButtonParentElement, options);
+}
+
+function setDisplayPreviousButton(button, leftOffset) {
+    if (button) {
+        // reached start, should not show previous button
+        if (leftOffset === 0) {
+            button.setAttribute('style', 'display:none')
+        } else {
+            button.removeAttribute('style');
+        }
+    }
+}
+
+function setDisplayNextButton(button, leftOffset, stickersTabBarWidth) {
+    if (button) {
+        // reached end, should not show next button 
+        // remaining width is less than 210, should not show next button
+        if (stickersTabBarWidth + leftOffset < 210) {
+            button.setAttribute('style', 'display:none');
+        } else {
+            button.removeAttribute('style');
+        }
+    }
+}
+
+function setDisplayNavigationButtons(stickersTabBar) {
+    let navigationButtonParentElement = stickersTabBar.closest('._5r85');
+    let previousButtonElement = navigationButtonParentElement.querySelector('._37wu.previous-stickers');
+    let nextButtonElement = navigationButtonParentElement.querySelector('._37wv.next-stickers');
+
+    let leftOffset = getElementLeftOffset(stickersTabBar);
+    setDisplayPreviousButton(previousButtonElement, leftOffset);
+    setDisplayNextButton(nextButtonElement, leftOffset, stickersTabBar.offsetWidth);
+}
+
+function stickersTabBarLeftOffsetMutationsHandler(mutations, observer) {
+    // watch for style so there should be only one change at a time
+    let mutationRecord = mutations[0];
+    let stickersTabBar = mutationRecord.target;
+
+    setDisplayNavigationButtons(stickersTabBar);
+}
+
+function observeStickersTabBarLeftOffset(stickersTabBar, observer) {
+    let options = {
+        attributeFilter: ['style'],
+        attributes: true
+    }
+
+    observer.observe(stickersTabBar, options);
+}
+
+function stickersTabBarMutationHandler(mutations, observer) {
+    let dataIdOfStickerTableObserver = new MutationObserver(dataIdOfStickerTableContainerMutationHandler);
+    let navigationButtonUpdatedObserver = new MutationObserver(navigationButtonUpdatedMutationsHandler);
+    let stickersTabBarLeftOffsetObserver = new MutationObserver(stickersTabBarLeftOffsetMutationsHandler)
 
     let stickersTabBar = document.querySelector('._5r89');
     if (stickersTabBar !== null) {
@@ -133,12 +257,21 @@ function chatTabContainerMutationHandler(mutations, observer) {
             let element = createStickerTabContainerElement(stickerGroups);
             stickersTabBar.appendChild(element);
             stickersTabBar.setAttribute('data-appended-stickers-tab', true);
-            observeDataIdOfStickerTableContainer(stickersTableObserver);
-            attachHighlightOnSelectToStickerTabs();
+            observeDataIdOfStickerTableContainer(dataIdOfStickerTableObserver);
+            observeStickersTabBarLeftOffset(stickersTabBar, stickersTabBarLeftOffsetObserver);
+            observeNavigationButtonUpdated(stickersTabBar, navigationButtonUpdatedObserver);
+            attachHighlightOnSelectToStickerTabs(stickersTabBar);
+            insertNavigationButtons(stickersTabBar);
+
+            // When the popup first time loads, sticker tab bar style isn't "changed"
+            // so won't be caught by stickersTabBarLeftOffsetObserver
+            setDisplayNavigationButtons(stickersTabBar);
         }
     // sticker tab bar is not found means sticker popup is closed
     } else {
-        stickersTableObserver.disconnect();
+        dataIdOfStickerTableObserver.disconnect();
+        navigationButtonUpdatedObserver.disconnect();
+        stickersTabBarLeftOffsetObserver.disconnect();
     }
 }
 
@@ -155,7 +288,7 @@ function isStickerTableOfExtensionAdded(mutations) {
     return false;
 }
 
-function stickerTableContainerMutationHandler(mutations, observer) {
+function dataIdOfStickerTableContainerMutationHandler(mutations, observer) {
     let stickerTableContainerElement = document.querySelector(
         'div[aria-label=Stickers] > div:nth-child(2) > div');
     
@@ -190,7 +323,7 @@ function stickerTableContainerMutationHandler(mutations, observer) {
     // So this case is already handled.
 }
 
-function chatToolBarMutationHandler(mutations, observer) {
+function sendButtonMutationsHandler(mutations, observer) {
     for (let mutation of mutations) {
         let nodes = mutation.addedNodes.values();
         for (let node of nodes) {
@@ -204,12 +337,12 @@ function chatToolBarMutationHandler(mutations, observer) {
     }
 }
 
-function observeChatToolBar(mutationObserver, chatToolBarElement) {
+function observeChatToolBar(observer, chatToolBarElement) {
     let options = {
         childList: true
     }
 
-    mutationObserver.observe(chatToolBarElement, options);
+    observer.observe(chatToolBarElement, options);
 }
 
 function canSendSticker(dropPanelElement) {
@@ -230,8 +363,8 @@ function onStickerClick(stickerElement) {
             .then(buffer => {
                 // Upload sticker gif takes a short time, during that time the send button isn't available
                 let chatToolBarElement = dropPanelElement.querySelector('._552n');
-                let chatToolBarObserver = new MutationObserver(chatToolBarMutationHandler);
-                observeChatToolBar(chatToolBarObserver, chatToolBarElement);
+                let sendButtonObserver = new MutationObserver(sendButtonMutationsHandler);
+                observeChatToolBar(sendButtonObserver, chatToolBarElement);
 
                 let file = new File([buffer], 'a.gif', { type: 'image/gif' });
                 simulateDragDrop(stickerElement, dropPanelElement, [file]);
@@ -240,11 +373,11 @@ function onStickerClick(stickerElement) {
 }
 
 function initialize() {
-    let chatTabContainerObserver = new MutationObserver(chatTabContainerMutationHandler);
-    observeForStickerPopup(chatTabContainerObserver);
+    let stickersTabBarObserver = new MutationObserver(stickersTabBarMutationHandler);
+    observeForStickerPopup(stickersTabBarObserver);
 }
 
-function observeDataIdOfStickerTableContainer(mutationObserver) {
+function observeDataIdOfStickerTableContainer(observer) {
     let options = {
         attributeFilter: ['data-id'],
         attribute: true,
@@ -255,10 +388,10 @@ function observeDataIdOfStickerTableContainer(mutationObserver) {
     let tableContainerElement = document.querySelector(
         'div[aria-label=Stickers] > div:nth-child(2) > div');
     
-    mutationObserver.observe(tableContainerElement, options);
+    observer.observe(tableContainerElement, options);
 }
 
-function observeForStickerPopup(mutationObserver) {
+function observeForStickerPopup(observer) {
     let options = {
         childList: true, 
         subtree: true 
@@ -267,7 +400,7 @@ function observeForStickerPopup(mutationObserver) {
     // Only watch chat tabs container to avoid too many mutations being detected
     let chatTabContainer = document.querySelector('._59v1');
     if (chatTabContainer) {
-        mutationObserver.observe(chatTabContainer, options);
+        observer.observe(chatTabContainer, options);
     } else {
         // Is on messenger page
         // TODO on messenger page

@@ -67,10 +67,13 @@ function fetchTemplate(templateName, cb) {
         .then(data => cb(data));
 }
 
+// New template should have their name registered here
 var templateNames = [
     'stickerTab', 
     'stickerTabContainer',
-    'stickerTable'
+    'stickerTable',
+    'nextTabsButton',
+    'previousTabsButton'
 ];
 
 function injectTemplates(tabId, cb) {
