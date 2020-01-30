@@ -13,16 +13,26 @@ function findStickerDirectory(entries) {
     }
 }
 
-function createReadStickerGroupPromise(stickerGroupEntry, groupId) {
+function readEntriesAsync(stickerGroupReader) {
     return new Promise((resolve, reject) => {
-        let stickerGroupReader = stickerGroupEntry.createReader();
         stickerGroupReader.readEntries(entries => {
-            let stickerGroup = {
-                groupId: groupId,
-                groupName: stickerGroupEntry.name,
-                stickers: []
-            }
+            resolve(entries);
+        }, error => reject(error));
+    });
+}
 
+async function buildStickerGroupAsync(stickerGroupEntry, groupId) {
+    let stickerGroupReader = stickerGroupEntry.createReader();
+    let stickerGroup = {
+        groupId: groupId,
+        groupName: stickerGroupEntry.name,
+        stickers: []
+    }
+
+    let read = async function() {
+        let entries = await readEntriesAsync(stickerGroupReader);
+        // Recursively call read() until all entries is read
+        if (entries.length > 0) {
             for (let entry of entries) {
                 if (entry.name.indexOf('groupThumbnail') !== -1) {
                     stickerGroup.groupThumbnail = entry.name;
@@ -33,21 +43,24 @@ function createReadStickerGroupPromise(stickerGroupEntry, groupId) {
                     })
                 }
             }
+            await read();
+        }
+    }
 
-            resolve(stickerGroup);
-        }, error => reject(error))
-    });
+    await read();
+    return stickerGroup;
 }
 
-function buildStickerGroups(stickerGroupEntries) {
-    let promises = [];
+async function buildStickerGroups(stickerGroupEntries) {
+    let stickerGroups = [];
     let groupId = 1;
 
     for (let stickerGroupEntry of stickerGroupEntries) {
-        promises.push(createReadStickerGroupPromise(stickerGroupEntry, groupId++));
+        let stickerGroup = await buildStickerGroupAsync(stickerGroupEntry, groupId++);
+        stickerGroups.push(stickerGroup);
     }
 
-    return Promise.all(promises);
+    return stickerGroups;
 }
 
 function loadStickerData(tabId) {
@@ -63,7 +76,7 @@ function loadStickerData(tabId) {
                         setGlobalData(tabId, stickerGroupsStr, () =>
                             injectTemplates(tabId, () =>
                                 injectMustache(tabId, () =>
-                                    injectObserver(tabId, () => {}))))
+                                    injectObserver(tabId, () => {}))));
                     });
             });
         })
