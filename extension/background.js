@@ -5,22 +5,67 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     }
 })
 
-function loadStickerData(tabId) {
-    chrome.runtime.getPackageDirectoryEntry(root => {
-        root.getFile('stickers.json', {}, fileEntry => {
-            fileEntry.file(file => {
-                let reader = new FileReader();
-                reader.onloadend = e => {
-                    let stickerGroupsStr = e.target.result
-                    setGlobalData(tabId, stickerGroupsStr, () =>
-                        injectTemplates(tabId, () => 
-                            injectMustache(tabId, () =>
-                                injectObserver(tabId, () => {}))
-                    ))  
+function findStickerDirectory(entries) {
+    for (let entry of entries) {
+        if (entry.isDirectory && entry.name === 'stickers') {
+            return entry;
+        }
+    }
+}
+
+function createReadStickerGroupPromise(stickerGroupEntry, groupId) {
+    return new Promise((resolve, reject) => {
+        let stickerGroupReader = stickerGroupEntry.createReader();
+        stickerGroupReader.readEntries(entries => {
+            let stickerGroup = {
+                groupId: groupId,
+                groupName: stickerGroupEntry.name,
+                stickers: []
+            }
+
+            for (let entry of entries) {
+                if (entry.name.indexOf('groupThumbnail') !== -1) {
+                    stickerGroup.groupThumbnail = entry.name;
+                } else {
+                    stickerGroup.stickers.push({
+                        id: entry.name.replace('.gif', ''),
+                        thumbnail: entry.name
+                    })
                 }
-                
-                reader.readAsText(file);
-            })
+            }
+
+            resolve(stickerGroup);
+        }, error => reject(error))
+    });
+}
+
+function buildStickerGroups(stickerGroupEntries) {
+    let promises = [];
+    let groupId = 1;
+
+    for (let stickerGroupEntry of stickerGroupEntries) {
+        promises.push(createReadStickerGroupPromise(stickerGroupEntry, groupId++));
+    }
+
+    return Promise.all(promises);
+}
+
+function loadStickerData(tabId) {
+    chrome.runtime.getPackageDirectoryEntry(directoryEntry => {
+        var rootReader = directoryEntry.createReader();
+        rootReader.readEntries(entries => {
+            let stickersDirectoryEntry = findStickerDirectory(entries);
+            let stickersReader = stickersDirectoryEntry.createReader();
+            stickersReader.readEntries(entries => {
+                buildStickerGroups(entries)
+                    .then(stickerGroups => {
+                        let stickerGroupsStr = JSON.stringify(stickerGroups);
+                        setGlobalData(tabId, stickerGroupsStr, () =>
+                            injectTemplates(tabId, () =>
+                                injectMustache(tabId, () =>
+                                    injectObserver(tabId, () => {}))))
+                    });
+            });
         })
     })
 }
@@ -42,10 +87,10 @@ function convertThumbnailPath(stickerGroupsStr) {
     let stickerGroups = JSON.parse(stickerGroupsStr);
     for (let stickerGroup of stickerGroups) {
         stickerGroup.groupThumbnail = chrome.runtime.getURL(
-            `images/stickers/${stickerGroup.groupName}/${stickerGroup.groupThumbnail}`);
+            `stickers/${stickerGroup.groupName}/${stickerGroup.groupThumbnail}`);
         for (let sticker of stickerGroup.stickers) {
             sticker.thumbnail = chrome.runtime.getURL(
-                `images/stickers/${stickerGroup.groupName}/${sticker.thumbnail}`);
+                `stickers/${stickerGroup.groupName}/${sticker.thumbnail}`);
         }
     }
     return JSON.stringify(stickerGroups);

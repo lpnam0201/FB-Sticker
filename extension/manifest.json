@@ -13,7 +13,7 @@
         "https://*.facebook.com/*"
     ],
     "web_accessible_resources": [
-        "images/*",
+        "stickers/*",
         "scripts/*",
         "templates/*",
         "lib/*"
