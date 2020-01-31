@@ -78,6 +78,17 @@ function createStickerTabElement(stickerGroup) {
     return tabElement;
 }
 
+function attachOnClickSaveStickerGroupIdExtensionTab(stickersTabBar) {
+    let extensionTabs = stickersTabBar.querySelectorAll('.fbExtensionTab');
+    extensionTabs.forEach(extensionTab => {
+        extensionTab.addEventListener('click', () => {
+            // To display the same extension tab the next time sticker popup is opened
+            let stickerGroupdId = extensionTab.getAttribute('data-id');
+            localStorage.setItem('selectedStickerGroupId', stickerGroupdId);
+        })
+    });
+}
+
 function attachOnClickShowStickersTableExtensionTab(stickersTabBar) {
     let extensionTabs = stickersTabBar.querySelectorAll('.fbExtensionTab');
     extensionTabs.forEach(extensionTab => {
@@ -134,11 +145,11 @@ function htmlToElement(html) {
 function attachHighlightOnSelectToStickerTabs(stickersTabBar) {
     let stickerTabs = stickersTabBar.querySelectorAll('._5r8a');
     for (let stickerTab of stickerTabs) {
-        stickerTab.onclick = function() {
+        stickerTab.addEventListener('click', function() {
             // clear all selected class on all sticker tabs and set select for itself
             stickerTabs.forEach(st => { st.classList.remove('_5r8b') });
             stickerTab.classList.add('_5r8b');
-        }
+        });
     }
 }
 
@@ -148,6 +159,10 @@ function getElementLeftOffset(element) {
 
 function pxToNumber(px) {
     return parseInt(px.replace('px', ''));
+}
+
+function scrollStickersTabBar(stickersTabBar, leftOffset) {
+    stickersTabBar.setAttribute('style', `left: ${leftOffset}px;`)
 }
 
 function createPreviousTabsButtonElement(stickersTabBar) {
@@ -160,8 +175,9 @@ function createPreviousTabsButtonElement(stickersTabBar) {
         // First transition from search tab shifts by 208px because search and recent tabs are 41px
         // while sticker tabs are all 42px
         // Subsequent transitions shift by 210px at a time (5 sticker tabs)
-        let shiftBy = Math.abs(currentLeftOffset) === 208 ? 208 : 210;
-        stickersTabBar.setAttribute('style', `left: ${currentLeftOffset + shiftBy}px;`)
+
+        let shiftBy = Math.abs(currentLeftOffset) <= 208 ? Math.abs(currentLeftOffset) : 210;
+        scrollStickersTabBar(stickersTabBar, currentLeftOffset + shiftBy);
     }
 
     return element;
@@ -178,7 +194,7 @@ function createNextTabsButtonElement(stickersTabBar) {
         // while sticker tabs are all 42px
         // Subsequent transitions shift by 210px at a time (5 sticker tabs)
         let shiftBy = currentLeftOffset === 0 ? 208 : 210;
-        stickersTabBar.setAttribute('style', `left: ${currentLeftOffset - shiftBy}px;`)
+        scrollStickersTabBar(stickersTabBar, currentLeftOffset - shiftBy);
     }
 
     return element;
@@ -264,6 +280,16 @@ function observeStickersTabBarLeftOffset(stickersTabBar, observer) {
     observer.observe(stickersTabBar, options);
 }
 
+function attachOnClickRemoveLastSelectedStickerGroupIdToFbTabs(stickersTabBar) {
+    let fbTabs = stickersTabBar.querySelectorAll('._5r8a:not(.fbExtensionTab)');
+
+    fbTabs.forEach(fbTab => {
+        fbTab.addEventListener('click', () => {
+            localStorage.removeItem('selectedStickerGroupId');
+        });
+    });
+}
+
 function attachOnClickRemoveExistingExtensionTableToTabs(stickersTabBar) {
     let tabs = stickersTabBar.querySelectorAll('._5r8a');
 
@@ -277,6 +303,50 @@ function attachOnClickRemoveExistingExtensionTableToTabs(stickersTabBar) {
     })
 }
 
+function selectTabFromLastTime(stickersTabBar) {
+    // TODO: should handle case when selecting fb Tab, then extension tab, then closing.
+    // Upon opening sticker popup back, logically extension tab should be scrolled to
+    // but FB's last selected is still a fb tab and it supposedly load asynchronously
+    // causing the stickersTabBar to scroll back to fb Tab
+    // Feature: Selecting previously selected extension tab is suspended
+
+    let stickerGroupId = localStorage.getItem('selectedStickerGroupId');
+    if (stickerGroupId) {
+        let tabs = stickersTabBar.querySelectorAll('._5r8a');
+        let findResult = findNumberOfTabsToSkip(stickerGroupId, tabs);
+
+        if (findResult.tab !== null) {
+            scrollToSelectedExtensionTab(findResult.skip, stickersTabBar);
+            findResult.tab.click();
+        }
+    }
+}
+
+function findNumberOfTabsToSkip(stickerGroupId, tabs) {
+    let skip = 0;
+    for (let tab of tabs) {
+        let currentStickerGroupId = tab.getAttribute('data-id');
+        if (currentStickerGroupId === stickerGroupId) {
+            return {
+                skip: skip,
+                tab: tab
+            };
+        }
+        skip++;
+    }
+
+    return {
+        skip: -1,
+        tab: null
+    }
+}
+
+function scrollToSelectedExtensionTab(skip, stickersTabBar) {
+    // Differ in width: search and recent tab: 41px, sticker tab: 42px
+    let leftOffset = - (41 * 2 + 42 * (skip - 2));
+    scrollStickersTabBar(stickersTabBar, leftOffset);
+}
+ 
 function stickersTabBarMutationHandler(mutations, observer) {
     let navigationButtonUpdatedObserver = new MutationObserver(navigationButtonUpdatedMutationsHandler);
     let stickersTabBarLeftOffsetObserver = new MutationObserver(stickersTabBarLeftOffsetMutationsHandler)
@@ -292,8 +362,12 @@ function stickersTabBarMutationHandler(mutations, observer) {
             attachHighlightOnSelectToStickerTabs(stickersTabBar);
             // 'remove' onClick MUST fire before 'show' onClick handler therefore it is attached first
             attachOnClickRemoveExistingExtensionTableToTabs(stickersTabBar);
+            attachOnClickRemoveLastSelectedStickerGroupIdToFbTabs(stickersTabBar);
             attachOnClickShowStickersTableExtensionTab(stickersTabBar);
+            attachOnClickSaveStickerGroupIdExtensionTab(stickersTabBar);
             insertNavigationButtons(stickersTabBar);
+            //selectTabFromLastTime(stickersTabBar);
+            // TODO: Feature: add recently used extension stickers to recent
 
             // When the popup first time loads, sticker tab bar style isn't "changed"
             // so won't be caught by stickersTabBarLeftOffsetObserver
