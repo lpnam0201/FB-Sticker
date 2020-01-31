@@ -123,7 +123,7 @@ function injectMustache(tabId, cb) {
     chrome.tabs.executeScript(tabId, {
         code: `
             var script = document.createElement('script');
-            script.src = chrome.runtime.getURL('lib/customMustache.js');
+            script.src = chrome.runtime.getURL('lib/custom-mustache.js');
             document.head.appendChild(script);
             `
     }, cb);
