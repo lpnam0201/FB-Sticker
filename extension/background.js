@@ -4,13 +4,6 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     }
 })
 
-chrome.webNavigation.onCompleted.addListener(details => {
-    // Should not fire if a page load FB in one of its frames
-    if (isFbUrl(details.url) && details.frameId === 0) {
-        loadStickerData(details.tabId);
-    }
-})
-
 function isFbUrl(url) {
     return url.indexOf('https://www.facebook.com/') !== -1;
 }
@@ -85,8 +78,9 @@ function loadStickerData(tabId) {
                         let stickerGroupsStr = JSON.stringify(stickerGroups);
                         setGlobalData(tabId, stickerGroupsStr, () =>
                             injectTemplates(tabId, () =>
-                                injectMustache(tabId, () =>
-                                    injectObserver(tabId, () => {}))));
+                            injectMustache(tabId, () =>
+                            injectSmoothScrollbar(tabId, () =>
+                            injectObserver(tabId, () => {})))));
                     });
             });
         })
@@ -124,6 +118,16 @@ function injectMustache(tabId, cb) {
         code: `
             var script = document.createElement('script');
             script.src = chrome.runtime.getURL('lib/custom-mustache.js');
+            document.head.appendChild(script);
+            `
+    }, cb);
+}
+
+function injectSmoothScrollbar(tabId, cb) {
+    chrome.tabs.executeScript(tabId, {
+        code: `
+            var script = document.createElement('script');
+            script.src = chrome.runtime.getURL('lib/smooth-scrollbar.js');
             document.head.appendChild(script);
             `
     }, cb);
@@ -174,7 +178,6 @@ function injectObserver(tabId, cb) {
             var script = document.createElement('script');
             script.src = chrome.runtime.getURL('scripts/observer.js');
             document.head.appendChild(script);
-            `,
-        runAt: 'document_end'
+            `
     }, cb);
 }
