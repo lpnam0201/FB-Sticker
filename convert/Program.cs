@@ -13,9 +13,17 @@ namespace convert
         static string toolPath = @"..\tools";
         static int FBStickerWidth = 120;
         static int FBStickerHeight = 120;
+        static string backgroundColor = "white";
 
         static void Main(string[] args)
         {
+            rawDirectory = args[0];
+            convertedDirectory = args[1];
+            toolPath = args[2];
+            FBStickerWidth = int.Parse(args[3]);
+            FBStickerHeight = int.Parse(args[4]);
+            backgroundColor = args[5];
+
             string[] fileNames = Directory.GetFiles(rawDirectory)
                 .Select(x => Path.GetFileNameWithoutExtension(x))
                 .ToArray();
@@ -60,7 +68,7 @@ namespace convert
                 $@"{sourcePath}"
                 .Arg("-coalesce")
                 .Arg("-loop 0")
-                .Arg("-background white")
+                .Arg($"-background {backgroundColor}")
                 .Arg("-gravity center")
                 .Arg($"-extent {longerEdgeLength}x{longerEdgeLength}")
                 .Arg($"-scale {FBStickerWidth}x{FBStickerHeight}")
