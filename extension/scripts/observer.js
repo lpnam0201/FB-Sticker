@@ -92,7 +92,12 @@ function attachOnClickShowStickersTableExtensionTab(stickersTabBar) {
     
             // FB's default container should NEVER be removed (React error)
             // but should be pushed down out of view
+            // Can't simply prepend <table> because search tab
+            // doesn't have table container <div> like sticker tabs
             tableContainerElement.prepend(tableElement);
+            
+            // To init scroll for the *newly* inserted table
+            Scrollbar.initAll();
         })
     })
 }

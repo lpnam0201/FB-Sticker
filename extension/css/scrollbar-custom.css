@@ -1,0 +1,9 @@
+.scrollbar-track:hover {
+    width: 10px;
+    transition: width 250ms;
+}
+
+.scrollbar-thumb:hover {
+    width: 10px;
+    transition: width 250ms;
+}

@@ -80,7 +80,8 @@ function loadStickerData(tabId) {
                             injectTemplates(tabId, () =>
                             injectMustache(tabId, () =>
                             injectSmoothScrollbar(tabId, () =>
-                            injectObserver(tabId, () => {})))));
+                            injectSmoothScrollbarCustomCss(tabId, () =>
+                            injectObserver(tabId, () => {}))))));
                     });
             });
         })
@@ -130,6 +131,12 @@ function injectSmoothScrollbar(tabId, cb) {
             script.src = chrome.runtime.getURL('lib/smooth-scrollbar.js');
             document.head.appendChild(script);
             `
+    }, cb);
+}
+
+function injectSmoothScrollbarCustomCss(tabId, cb) {
+    chrome.tabs.insertCSS(tabId, {
+        file: 'css/scrollbar-custom.css'
     }, cb);
 }
 

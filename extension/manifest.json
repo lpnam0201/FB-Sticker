@@ -17,6 +17,7 @@
         "stickers/*",
         "scripts/*",
         "templates/*",
-        "lib/*"
+        "lib/*",
+        "css/*"
     ]
 }
