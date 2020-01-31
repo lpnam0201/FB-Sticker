@@ -5,7 +5,8 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 })
 
 chrome.webNavigation.onCompleted.addListener(details => {
-    if (isFbUrl(details.url)) {
+    // Should not fire if a page load FB in one of its frames
+    if (isFbUrl(details.url) && details.frameId === 0) {
         loadStickerData(details.tabId);
     }
 })
