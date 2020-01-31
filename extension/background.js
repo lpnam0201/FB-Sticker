@@ -33,7 +33,7 @@ function readEntriesAsync(stickerGroupReader) {
 async function buildStickerGroupAsync(stickerGroupEntry, groupId) {
     let stickerGroupReader = stickerGroupEntry.createReader();
     let stickerGroup = {
-        groupId: groupId,
+        groupId: groupId.toString(),
         groupName: stickerGroupEntry.name,
         stickers: []
     }
