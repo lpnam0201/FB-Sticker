@@ -10,6 +10,7 @@
     "browser_action": {},
     "permissions": [
         "tabs",
+        "webNavigation",
         "https://*.facebook.com/*"
     ],
     "web_accessible_resources": [

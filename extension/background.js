@@ -1,9 +1,18 @@
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-    if (tab.url.indexOf('https://www.facebook.com/') !== -1
-        && changeInfo.status === 'complete') {
+    if (isFbUrl(tab.url) && changeInfo.status === 'complete') {
         loadStickerData(tabId);
     }
 })
+
+chrome.webNavigation.onCompleted.addListener(details => {
+    if (isFbUrl(details.url)) {
+        loadStickerData(details.tabId);
+    }
+})
+
+function isFbUrl(url) {
+    return url.indexOf('https://www.facebook.com/') !== -1;
+}
 
 function findStickerDirectory(entries) {
     for (let entry of entries) {
@@ -65,7 +74,7 @@ async function buildStickerGroups(stickerGroupEntries) {
 
 function loadStickerData(tabId) {
     chrome.runtime.getPackageDirectoryEntry(directoryEntry => {
-        var rootReader = directoryEntry.createReader();
+        let rootReader = directoryEntry.createReader();
         rootReader.readEntries(entries => {
             let stickersDirectoryEntry = findStickerDirectory(entries);
             let stickersReader = stickersDirectoryEntry.createReader();
