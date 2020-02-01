@@ -80,7 +80,7 @@ function loadStickerData(tabId) {
                             injectTemplates(tabId, () =>
                             injectMustache(tabId, () =>
                             injectSmoothScrollbar(tabId, () =>
-                            injectSmoothScrollbarCustomCss(tabId, () =>
+                            injectCss(tabId, () =>
                             injectObserver(tabId, () => {}))))));
                     });
             });
@@ -134,10 +134,10 @@ function injectSmoothScrollbar(tabId, cb) {
     }, cb);
 }
 
-function injectSmoothScrollbarCustomCss(tabId, cb) {
-    chrome.tabs.insertCSS(tabId, {
-        file: 'css/scrollbar-custom.css'
-    }, cb);
+function injectCss(tabId, cb) {
+    chrome.tabs.insertCSS(tabId, { file: 'css/scrollbar-custom.css' }, () => 
+        chrome.tabs.insertCSS(tabId, { file: 'css/stickers-tab-bar.css' }, () => 
+            chrome.tabs.insertCSS(tabId, { file: 'css/fb-sticker-tab.css' }, cb )));
 }
 
 function fetchTemplate(templateName, cb) {

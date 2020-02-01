@@ -153,8 +153,9 @@ function attachHighlightOnSelectToStickerTabs(stickersTabBar) {
     }
 }
 
-function getElementLeftOffset(element) {
-    return pxToNumber(window.getComputedStyle(element).left);
+function getElementLeftOffsetFromInlineStyle(element) {
+    let leftPx = element.style.left || '0px';
+    return pxToNumber(leftPx);
 }
 
 function pxToNumber(px) {
@@ -170,14 +171,11 @@ function createPreviousTabsButtonElement(stickersTabBar) {
     element.classList.add('previous-stickers');
 
     element.onclick = function() {
-        let currentLeftOffset = getElementLeftOffset(stickersTabBar);
+        let currentLeftOffset = getElementLeftOffsetFromInlineStyle(stickersTabBar);
 
-        // First transition from search tab shifts by 208px because search and recent tabs are 41px
-        // while sticker tabs are all 42px
-        // Subsequent transitions shift by 210px at a time (5 sticker tabs)
-
-        let shiftBy = Math.abs(currentLeftOffset) <= 208 ? Math.abs(currentLeftOffset) : 210;
-        scrollStickersTabBar(stickersTabBar, currentLeftOffset + shiftBy);
+        let remaining = Math.abs(currentLeftOffset);
+        let leftOffset = remaining < 210 ? 0 : currentLeftOffset + 210;
+        scrollStickersTabBar(stickersTabBar, leftOffset);
     }
 
     return element;
@@ -188,13 +186,14 @@ function createNextTabsButtonElement(stickersTabBar) {
     element.classList.add('next-stickers');
 
     element.onclick = function() {
-        let currentLeftOffset = getElementLeftOffset(stickersTabBar);
+        let currentLeftOffset = getElementLeftOffsetFromInlineStyle(stickersTabBar);
 
-        // Final transition to search tab shifts by 208px because search and recent tabs are 41px
-        // while sticker tabs are all 42px
-        // Subsequent transitions shift by 210px at a time (5 sticker tabs)
-        let shiftBy = currentLeftOffset === 0 ? 208 : 210;
-        scrollStickersTabBar(stickersTabBar, currentLeftOffset - shiftBy);
+        let barWidth = stickersTabBar.offsetWidth;
+        let remainingWidth = barWidth - Math.abs(currentLeftOffset) - 210;
+        let leftOffset = remainingWidth < 210 
+            ? currentLeftOffset - remainingWidth 
+            : currentLeftOffset - 210;
+        scrollStickersTabBar(stickersTabBar, leftOffset);
     }
 
     return element;
@@ -245,7 +244,7 @@ function setDisplayNextButton(button, leftOffset, stickersTabBarWidth) {
     if (button) {
         // reached end, should not show next button 
         // remaining width is less than 210, should not show next button
-        if (stickersTabBarWidth + leftOffset < 210) {
+        if (Math.abs(leftOffset) + 210 === stickersTabBarWidth) {
             button.setAttribute('style', 'display:none');
         } else {
             button.removeAttribute('style');
@@ -258,7 +257,7 @@ function setDisplayNavigationButtons(stickersTabBar) {
     let previousButtonElement = navigationButtonParentElement.querySelector('._37wu.previous-stickers');
     let nextButtonElement = navigationButtonParentElement.querySelector('._37wv.next-stickers');
 
-    let leftOffset = getElementLeftOffset(stickersTabBar);
+    let leftOffset = getElementLeftOffsetFromInlineStyle(stickersTabBar);
     setDisplayPreviousButton(previousButtonElement, leftOffset);
     setDisplayNextButton(nextButtonElement, leftOffset, stickersTabBar.offsetWidth);
 }
@@ -346,6 +345,10 @@ function scrollToSelectedExtensionTab(skip, stickersTabBar) {
     let leftOffset = - (41 * 2 + 42 * (skip - 2));
     scrollStickersTabBar(stickersTabBar, leftOffset);
 }
+
+function setSmoothScrollForStickersTabBar(stickersTabBar) {
+    stickersTabBar.classList.add('smooth-scroll');
+}
  
 function stickersTabBarMutationHandler(mutations, observer) {
     let navigationButtonUpdatedObserver = new MutationObserver(navigationButtonUpdatedMutationsHandler);
@@ -357,6 +360,7 @@ function stickersTabBarMutationHandler(mutations, observer) {
             let element = createStickerTabContainerElement(stickerGroups);
             stickersTabBar.appendChild(element);
             stickersTabBar.setAttribute('data-appended-stickers-tab', true);
+            setSmoothScrollForStickersTabBar(stickersTabBar);
             observeStickersTabBarLeftOffset(stickersTabBar, stickersTabBarLeftOffsetObserver);
             observeNavigationButtonUpdated(stickersTabBar, navigationButtonUpdatedObserver);
             attachHighlightOnSelectToStickerTabs(stickersTabBar);
