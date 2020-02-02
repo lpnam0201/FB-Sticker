@@ -14,8 +14,8 @@
         "https://*.facebook.com/*"
     ],
     "web_accessible_resources": [
+        "main.js",
         "stickers/*",
-        "scripts/*",
         "templates/*",
         "lib/*",
         "css/*"
