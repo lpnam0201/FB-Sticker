@@ -1,0 +1,11 @@
+{
+    "scripts": {
+        "build": "webpack --config webpack.config.js"
+    },
+    "devDependencies": {
+        "filemanager-webpack-plugin": "^2.0.5",
+        "webpack": "^4.41.5",
+        "webpack-cli": "^3.3.10",
+        "copy-webpack-plugin": "^5.1.1"
+    }
+}

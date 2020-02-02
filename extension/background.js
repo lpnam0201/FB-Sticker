@@ -81,7 +81,7 @@ function loadStickerData(tabId) {
                             injectMustache(tabId, () =>
                             injectSmoothScrollbar(tabId, () =>
                             injectCss(tabId, () =>
-                            injectObserver(tabId, () => {}))))));
+                            injectMain(tabId, () => {}))))));
                     });
             });
         })
@@ -179,11 +179,11 @@ function injectTemplates(tabId, cb) {
     })
 }
 
-function injectObserver(tabId, cb) {
+function injectMain(tabId, cb) {
     chrome.tabs.executeScript(tabId, {
         code: `
             var script = document.createElement('script');
-            script.src = chrome.runtime.getURL('scripts/observer.js');
+            script.src = chrome.runtime.getURL('main.js');
             document.head.appendChild(script);
             `
     }, cb);
