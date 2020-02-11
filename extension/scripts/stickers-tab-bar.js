@@ -108,6 +108,12 @@ export function setSmoothScrollForStickersTabBar(stickersTabBar) {
     stickersTabBar.classList.add('smooth-scroll');
 }
 
+export function setInitialLeftOffsetForStickersTabBar(stickersTabBar) {
+    if (!stickersTabBar.hasAttribute('style') ) {
+        stickersTabBar.setAttribute('style', 'left: 0px;')
+    }
+}
+
 function createStickersTableElement(stickerGroup) {  
     let table = { rows: [] };
     let chunks = chunk(stickerGroup.stickers, 4);

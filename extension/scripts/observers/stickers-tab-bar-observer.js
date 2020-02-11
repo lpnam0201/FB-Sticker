@@ -3,6 +3,7 @@ import { StickersTabBarLeftOffsetObserver } from './stickers-tab-bar-left-offset
 import {
     createStickerTabContainerElement,
     setSmoothScrollForStickersTabBar,
+    setInitialLeftOffsetForStickersTabBar,
     attachHighlightOnSelectToStickerTabs,
     attachOnClickRemoveExistingExtensionTableToTabs,
     attachOnClickRemoveLastSelectedStickerGroupIdToFbTabs,
@@ -26,6 +27,7 @@ export class StickersTabBarObserver {
                     stickersTabBar.appendChild(element);
                     stickersTabBar.setAttribute('data-appended-stickers-tab', true);
                     setSmoothScrollForStickersTabBar(stickersTabBar);
+                    setInitialLeftOffsetForStickersTabBar(stickersTabBar);
                     stickersTabBarLeftOffsetObserver.observe(stickersTabBar);
                     navigationButtonUpdatedObserver.observe(stickersTabBar);
                     attachHighlightOnSelectToStickerTabs(stickersTabBar);
