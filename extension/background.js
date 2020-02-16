@@ -136,8 +136,9 @@ function injectSmoothScrollbar(tabId, cb) {
 
 function injectCss(tabId, cb) {
     chrome.tabs.insertCSS(tabId, { file: 'css/scrollbar-custom.css' }, () => 
-        chrome.tabs.insertCSS(tabId, { file: 'css/stickers-tab-bar.css' }, () => 
-            chrome.tabs.insertCSS(tabId, { file: 'css/fb-sticker-tab.css' }, cb )));
+    chrome.tabs.insertCSS(tabId, { file: 'css/stickers-tab-bar.css' }, () => 
+    chrome.tabs.insertCSS(tabId, { file: 'css/fb-sticker-tab.css' }, () => 
+    chrome.tabs.insertCSS(tabId, { file: 'css/sticker-image.css' }, cb))));
 }
 
 function fetchTemplate(templateName, cb) {
