@@ -73,6 +73,7 @@ function loadStickerData(tabId) {
             let stickersDirectoryEntry = findStickerDirectory(entries);
             let stickersReader = stickersDirectoryEntry.createReader();
             stickersReader.readEntries(entries => {
+                entries = entries.filter(entry => entry.isDirectory);
                 buildStickerGroups(entries)
                     .then(stickerGroups => {
                         let stickerGroupsStr = JSON.stringify(stickerGroups);
