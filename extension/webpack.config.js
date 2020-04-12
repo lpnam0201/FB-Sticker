@@ -14,7 +14,8 @@ module.exports = {
             { from: 'templates', to: 'templates' },
             { from: 'css', to: 'css' },
             { from: 'lib', to: 'lib' }, 
-            { from: 'stickers', to: 'stickers' }
+            { from: 'stickers', to: 'stickers' },
+            { from: 'assets', to: 'assets' }
         ])
     ],
     devtool: 'source-map',

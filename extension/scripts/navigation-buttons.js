@@ -45,7 +45,9 @@ function setDisplayNextButton(button, leftOffset, stickersTabBarWidth) {
 }
 
 function createPreviousTabsButtonElement(stickersTabBar) {
-    let element = htmlToElement(Mustache.render(previousTabsButtonTemplate));
+    let element = htmlToElement(Mustache.render(previousTabsButtonTemplate, {
+        extensionUrl: extensionUrl
+    }));
     element.classList.add('previous-stickers');
 
     element.onclick = function() {
@@ -60,7 +62,9 @@ function createPreviousTabsButtonElement(stickersTabBar) {
 }
 
 function createNextTabsButtonElement(stickersTabBar) {
-    let element = htmlToElement(Mustache.render(nextTabsButtonTemplate));
+    let element = htmlToElement(Mustache.render(nextTabsButtonTemplate, {
+        extensionUrl: extensionUrl
+    }));
     element.classList.add('next-stickers');
 
     element.onclick = function() {

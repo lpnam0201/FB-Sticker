@@ -91,11 +91,15 @@ function loadStickerData(tabId) {
 
 function setGlobalData(tabId, stickerGroupsStr, cb) {
     stickerGroupsStr = convertThumbnailPath(stickerGroupsStr);
-
+    var extensionUrl = chrome.extension.getURL('');
+    extensionUrl = extensionUrl.slice(0, extensionUrl.length - 1);
     chrome.tabs.executeScript(tabId, {
         code: `
             var script = document.createElement('script');
-            var injectedCode = \`var stickerGroups = JSON.parse('${stickerGroupsStr}');\`
+            var injectedCode = \`
+                var stickerGroups = JSON.parse('${stickerGroupsStr}');
+                var extensionUrl = '${extensionUrl}';
+                \`;
             script.textContent = injectedCode;    
             document.head.appendChild(script);
             `
