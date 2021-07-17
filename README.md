@@ -6,7 +6,7 @@ This extension allows you to use images from your own computer as Facebook stick
 ![alt-text](https://github.com/lpnam0201/FB-Sticker/blob/master/README/whatitdoes.gif)
 
 # Installation
-Download the extension from:  
+Download the extension from: https://github.com/lpnam0201/FB-Sticker/releases/download/v1.0/fb-sticker.zip   
 Go to chrome://extensions  
 Turn on "Developer mode"  
 Click "Load unpacked"  
