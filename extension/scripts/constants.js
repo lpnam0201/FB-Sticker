@@ -1,0 +1,1 @@
+export const SendButtonSelector = '*[aria-label="Press Enter to send"]';

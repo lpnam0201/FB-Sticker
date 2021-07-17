@@ -59,7 +59,7 @@ export class StickersTabBarObserver {
         };
         
         // Only watch chat tabs container to avoid too many mutations being detected
-        let chatTabContainer = document.querySelector('._59v1');
+        let chatTabContainer = document.querySelector('.rq0escxv.l9j0dhe7.du4w35lb');
         if (chatTabContainer) {
             this.mutationObserver.observe(chatTabContainer, options);
         } else {

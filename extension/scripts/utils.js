@@ -18,7 +18,7 @@ export function simulateDragDrop(sourceNode, destinationNode, files) {
                 return this.data[type]
             },
             files: files,
-            types: "Files"
+            types: ["Files"]
         }
         return event
     }
