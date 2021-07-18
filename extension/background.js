@@ -99,7 +99,7 @@ function setGlobalData(tabId, stickerGroupsStr, cb) {
             var injectedCode = \`
                 var stickerGroups = JSON.parse('${stickerGroupsStr}');
                 var extensionUrl = '${extensionUrl}';
-                var currentChatIndex = null;
+                var currentOpenStickersButton = null;
                 \`;
             script.textContent = injectedCode;    
             document.head.appendChild(script);

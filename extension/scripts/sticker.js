@@ -3,9 +3,7 @@ import { ChatToolbarObserver } from './observers/chat-toolbar-observer'
 import { simulateDragDrop } from './utils'
 
 export function onStickerClick(stickerElement) {
-    let parentElementOfDropPanelAndSticker = stickerElement.closest('div.l9j0dhe7.tkr6xdv7');
-
-    let chatWindowElement = determineChatWindowElement(parentElementOfDropPanelAndSticker);
+    let chatWindowElement = determineChatWindowElement();
 
     let dropPanelElement = chatWindowElement
         .querySelector('.rq0escxv.buofh1pr.l9j0dhe7.j83agx80.cbu4d94t');
@@ -25,11 +23,10 @@ export function onStickerClick(stickerElement) {
     }
 }
 
-function determineChatWindowElement(parentElementOfDropPanelAndSticker) {
-    let chatWindowElements = parentElementOfDropPanelAndSticker.querySelectorAll('.l9j0dhe7.i09qtzwb.esma6hys.j83agx80');
+function determineChatWindowElement() {
     // [Global]
-    let index = currentChatIndex;
-    return chatWindowElements[index];
+    let openStickersButton = currentOpenStickersButton;
+    return openStickersButton.closest('.l9j0dhe7.i09qtzwb.esma6hys.j83agx80');
 }
 
 function canSendSticker(dropPanelElement) {

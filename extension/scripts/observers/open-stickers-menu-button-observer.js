@@ -23,17 +23,9 @@ export class OpenStickersMenuButtonObserver {
         function onOpensStickersMenuButtonClicked(event) {
             // In context of event handler, "this" refers to the button 
             let buttonElement = this;
-            let chatIndex = calculateChatIndex(buttonElement);
 
             // [Global]
-            currentChatIndex = chatIndex;
-        }
-
-        function calculateChatIndex(openStickersMenuButtonElement) {
-            let chatWindowElement = openStickersMenuButtonElement.closest(ChatWindowSelector);
-            let parent = chatWindowElement.parentNode;
-
-            return [...parent.children].indexOf(chatWindowElement);
+            currentOpenStickersButton = buttonElement;
         }
     }
 
