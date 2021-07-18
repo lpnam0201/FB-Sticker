@@ -1,5 +1,4 @@
 import { ChatTabContainerSelector } from '../constants';
-import { ChatWindowSelector } from '../constants';
 
 export class OpenStickersMenuButtonObserver {
     constructor() {

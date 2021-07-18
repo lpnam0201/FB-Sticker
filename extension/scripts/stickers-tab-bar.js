@@ -1,8 +1,8 @@
 import { htmlToElement, chunk } from './utils'
 import { onStickerClick } from './sticker';
 
-export function createStickerTabContainerElement(stickerGroups) {
-    let html = Mustache.render(stickerTabContainerTemplate);
+export function createStickerTabContainerElement(stickerGroups, templateStr) {
+    let html = Mustache.render(templateStr);
     let tabContainerElement = htmlToElement(html);
 
     // [Global]

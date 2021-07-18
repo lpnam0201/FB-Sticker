@@ -2,3 +2,14 @@
 ._817f {
     width: 42px;
 }
+
+.sticker-tab-container-top-popup {
+    height: 41px;
+    margin-bottom: 4px;
+    transform: translate(8px, 0px);
+}
+
+.sticker-tab-image {
+    width: 41px;
+    height: 41px;
+}

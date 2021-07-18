@@ -12,6 +12,7 @@ import {
 } from '../stickers-tab-bar'
 import { insertNavigationButtons, setDisplayNavigationButtons } from '../navigation-buttons'
 import { ChatTabContainerSelector } from '../constants';
+import { DataAppendedStickersTabAttribute } from '../constants';
 
 export class StickersTabBarObserver {
     constructor() {
@@ -23,11 +24,11 @@ export class StickersTabBarObserver {
         
             let stickersTabBar = document.querySelector('._5r89');
             if (stickersTabBar !== null) {
-                if (!stickersTabBar.getAttribute('data-appended-stickers-tab')) {
+                if (!stickersTabBar.getAttribute(DataAppendedStickersTabAttribute)) {
                     // [Global]
-                    let element = createStickerTabContainerElement(stickerGroups);
+                    let element = createStickerTabContainerElement(stickerGroups, stickerTabContainerTemplate);
                     stickersTabBar.appendChild(element);
-                    stickersTabBar.setAttribute('data-appended-stickers-tab', true);
+                    stickersTabBar.setAttribute(DataAppendedStickersTabAttribute, true);
                     setSmoothScrollForStickersTabBar(stickersTabBar);
                     setInitialLeftOffsetForStickersTabBar(stickersTabBar);
                     stickersTabBarLeftOffsetObserver.observe(stickersTabBar);

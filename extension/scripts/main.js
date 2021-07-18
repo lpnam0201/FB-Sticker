@@ -1,5 +1,6 @@
 import { OpenStickersMenuButtonObserver } from './observers/open-stickers-menu-button-observer'
 import { StickersTabBarObserver } from './observers/stickers-tab-bar-observer'
+import { StickersPopupObserver } from './observers/stickers-popup-observer'
 
 function initialize() {
     let stickersTabBarObserver = new StickersTabBarObserver();
@@ -7,6 +8,9 @@ function initialize() {
 
     let openStickersMenuButtonObserver = new OpenStickersMenuButtonObserver();
     openStickersMenuButtonObserver.observe();
+
+    let stickersPopupObserver = new StickersPopupObserver();
+    stickersPopupObserver.observe();
 }
 
 initialize();

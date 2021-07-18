@@ -159,7 +159,8 @@ var templateNames = [
     'stickerTabContainer',
     'stickerTable',
     'nextTabsButton',
-    'previousTabsButton'
+    'previousTabsButton',
+    'stickerTabContainerTopPopup'
 ];
 
 function injectTemplates(tabId, cb) {
