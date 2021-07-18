@@ -11,6 +11,7 @@ import {
     attachOnClickSaveStickerGroupIdExtensionTab
 } from '../stickers-tab-bar'
 import { insertNavigationButtons, setDisplayNavigationButtons } from '../navigation-buttons'
+import { ChatTabContainerSelector } from '../constants';
 
 export class StickersTabBarObserver {
     constructor() {
@@ -23,6 +24,7 @@ export class StickersTabBarObserver {
             let stickersTabBar = document.querySelector('._5r89');
             if (stickersTabBar !== null) {
                 if (!stickersTabBar.getAttribute('data-appended-stickers-tab')) {
+                    // [Global]
                     let element = createStickerTabContainerElement(stickerGroups);
                     stickersTabBar.appendChild(element);
                     stickersTabBar.setAttribute('data-appended-stickers-tab', true);
@@ -59,7 +61,7 @@ export class StickersTabBarObserver {
         };
         
         // Only watch chat tabs container to avoid too many mutations being detected
-        let chatTabContainer = document.querySelector('.rq0escxv.l9j0dhe7.du4w35lb');
+        let chatTabContainer = document.querySelector(ChatTabContainerSelector);
         if (chatTabContainer) {
             this.mutationObserver.observe(chatTabContainer, options);
         } else {

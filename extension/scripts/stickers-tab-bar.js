@@ -5,6 +5,7 @@ export function createStickerTabContainerElement(stickerGroups) {
     let html = Mustache.render(stickerTabContainerTemplate);
     let tabContainerElement = htmlToElement(html);
 
+    // [Global]
     for (let stickerGroup of stickerGroups) {
         let tabElement = createStickerTabElement(stickerGroup);
         tabContainerElement.appendChild(tabElement);
@@ -41,6 +42,7 @@ export function attachOnClickShowStickersTableExtensionTab(stickersTabBar) {
     extensionTabs.forEach(extensionTab => {
         extensionTab.addEventListener('click', () => {
             let groupId = extensionTab.getAttribute('data-id');
+            // [Global]
             let stickerGroup = stickerGroups.find(sg => sg.groupId === groupId)
     
             let tableElement = createStickersTableElement(stickerGroup);

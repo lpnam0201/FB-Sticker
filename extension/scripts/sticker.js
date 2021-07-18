@@ -3,7 +3,11 @@ import { ChatToolbarObserver } from './observers/chat-toolbar-observer'
 import { simulateDragDrop } from './utils'
 
 export function onStickerClick(stickerElement) {
-    let dropPanelElement = stickerElement.closest('div.l9j0dhe7.tkr6xdv7')
+    let parentElementOfDropPanelAndSticker = stickerElement.closest('div.l9j0dhe7.tkr6xdv7');
+
+    let chatWindowElement = determineChatWindowElement(parentElementOfDropPanelAndSticker);
+
+    let dropPanelElement = chatWindowElement
         .querySelector('.rq0escxv.buofh1pr.l9j0dhe7.j83agx80.cbu4d94t');
     // Should only upload sticker if chat box is empty (no message, no files)
     if (canSendSticker(dropPanelElement)) {
@@ -19,6 +23,13 @@ export function onStickerClick(stickerElement) {
                 simulateDragDrop(stickerElement, dropPanelElement, [file]);
             });
     }
+}
+
+function determineChatWindowElement(parentElementOfDropPanelAndSticker) {
+    let chatWindowElements = parentElementOfDropPanelAndSticker.querySelectorAll('.l9j0dhe7.i09qtzwb.esma6hys.j83agx80');
+    // [Global]
+    let index = currentChatIndex;
+    return chatWindowElements[index];
 }
 
 function canSendSticker(dropPanelElement) {
