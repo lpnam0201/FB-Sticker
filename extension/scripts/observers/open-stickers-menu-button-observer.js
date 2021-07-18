@@ -9,8 +9,7 @@ export class OpenStickersMenuButtonObserver {
             let openStickersMenuButtonElements = document
                 .querySelector('.rq0escxv.l9j0dhe7.du4w35lb')
                 .querySelectorAll(
-                    `${ChatWindowSelector}
-                    div[aria-label='Choose a sticker']`);
+                    `div[aria-label='Choose a sticker'][aria-hidden='false']`);
 
             for (let buttonElement of openStickersMenuButtonElements) {
                 let options = {
