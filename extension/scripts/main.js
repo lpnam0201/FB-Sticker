@@ -9,8 +9,9 @@ function initialize() {
     let openStickersMenuButtonObserver = new OpenStickersMenuButtonObserver();
     openStickersMenuButtonObserver.observe();
 
-    let stickersPopupObserver = new StickersPopupObserver();
-    stickersPopupObserver.observe();
+    // Temporary disable sticker bar on top of popup
+    // let stickersPopupObserver = new StickersPopupObserver();
+    // stickersPopupObserver.observe();
 }
 
 initialize();

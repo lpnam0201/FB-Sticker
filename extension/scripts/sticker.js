@@ -15,7 +15,7 @@ function loadStickerAndDropToPanel(stickerElement, dropPanelElement) {
             .then(res => res.arrayBuffer())
             .then(buffer => {
                 // Upload sticker gif takes a short time, during that time the send button isn't available
-                let chatToolBarElement = dropPanelElement.querySelector('.j83agx80.l9j0dhe7.aovydwv3.ni8dbmo4.stjgntxs.nred35xi.n8tt0mok.hyh9befq');
+                let chatToolBarElement = dropPanelElement.querySelector('.j83agx80.aovydwv3.pybr56ya.f10w8fjw');
                 let lookingForSendButtonObserver = new ChatToolbarObserver();
                 lookingForSendButtonObserver.observe(chatToolBarElement);
 
@@ -28,7 +28,7 @@ function loadStickerAndDropToPanel(stickerElement, dropPanelElement) {
 function determineDropPanel() {
     // [Global]
     let openStickersButton = currentOpenStickersButton;
-    return openStickersButton.closest('.rq0escxv.buofh1pr.l9j0dhe7.j83agx80.cbu4d94t');
+    return openStickersButton.closest('.buofh1pr.l9j0dhe7.j83agx80.cbu4d94t');
 }
 
 function canSendSticker(dropPanelElement) {
